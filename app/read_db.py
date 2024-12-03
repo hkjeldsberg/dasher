@@ -17,5 +17,6 @@ def get_db():
     finally:
         db.close()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     get_db()

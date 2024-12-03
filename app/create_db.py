@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
-from scipy.interpolate import splrep, splev
+from scipy.interpolate import splev, splrep
 
 sns.set_theme()
 
@@ -42,7 +42,7 @@ def get_metric(x, dep_n):
 
 
 def get_risk(x, dep_n):
-    return np.abs(10 + dep_n + 2 * x * np.log(x) * (- np.random.randn() * 0.25))
+    return np.abs(10 + dep_n + 2 * x * np.log(x) * (-np.random.randn() * 0.25))
 
 
 def map_int_to_date(start_date, days):
@@ -64,24 +64,19 @@ for i, dep in enumerate(deps):
         v.append(metric)
         r.append(risk_score)
 
-    tck_v = splrep(x, v, s=1E-15, k=3)
+    tck_v = splrep(x, v, s=1e-15, k=3)
     tck_r = splrep(x, r, s=1, k=3)
 
     vnew = splev(days_new, tck_v)
     rnew = splev(days_new, tck_r)
 
-    ax[0].plot(days_new, vnew, 'o-', label=f"metric (dep={dep})")
-    ax[1].plot(days_new, rnew, 'o-', label=f"risk (dep={dep})")
+    ax[0].plot(days_new, vnew, "o-", label=f"metric (dep={dep})")
+    ax[1].plot(days_new, rnew, "o-", label=f"risk (dep={dep})")
 
     for met, risk, day in zip(vnew, rnew, days_new):
         mapped_date = map_int_to_date(start_date, day)
 
-        data = (
-            mapped_date,
-            dep,
-            risk,
-            met
-        )
+        data = (mapped_date, dep, risk, met)
         mock_data.append(data)
 
 plt.title("Generated mock data")
