@@ -1,7 +1,7 @@
 #! /usr/bin/env bash
 
-isort app tests
+isort . src tests
 
-black app tests
+black . src tests
 
-flake8 app tests
+flake8 . src tests

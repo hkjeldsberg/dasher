@@ -27,9 +27,9 @@ def fetch_data(plain_sql=False):
 
 
 def prepare_data(df):
-    df['datetime'] = pd.to_datetime(df['report_date'], format='%Y-%m-%d')
-    df['date'] = pd.to_datetime(df['report_date'], format='%Y-%m-%d')
-    df.set_index('date', inplace=True)
+    df["datetime"] = pd.to_datetime(df["report_date"], format="%Y-%m-%d")
+    df["date"] = pd.to_datetime(df["report_date"], format="%Y-%m-%d")
+    df.set_index("date", inplace=True)
     return df
 
 
