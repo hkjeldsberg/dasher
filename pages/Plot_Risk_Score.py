@@ -1,5 +1,6 @@
 import streamlit as st
 
+from src.common import generate_slides
 from src.load_data import fetch_data, plot_data, prepare_data
 
 
@@ -32,13 +33,17 @@ def main():
     )
 
     departments = df.department.unique()
-    selected_departments = st.multiselect("Select departments to analyze", departments, departments[:2])
+    selected_departments = st.multiselect("Select departments to analyze", departments, departments)
     df = df[df["department"].isin(selected_departments)]
     df = df[(df["datetime"] > values[0]) & (df["datetime"] < values[1])]
 
     st.subheader("Risk score")
     data = df.pivot_table(index="date", columns="department", values="risk_score").fillna(0)
     st.line_chart(data)
+
+    feature = "risk_score"
+    feature_name = "Risk Score"
+    generate_slides(df, feature, feature_name)
 
 
 main()

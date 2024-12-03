@@ -1,5 +1,6 @@
 import streamlit as st
 
+from src.common import generate_slides
 from src.load_data import fetch_data, plot_data, prepare_data
 
 
@@ -39,6 +40,10 @@ def main():
     st.subheader("Financial metric")
     data = df.pivot_table(index="date", columns="department", values="financial_metric").fillna(0)
     st.line_chart(data)
+
+    feature = "financial_metric"
+    feature_name = "metrics"
+    generate_slides(df, feature, feature_name)
 
 
 main()
