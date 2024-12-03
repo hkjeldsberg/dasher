@@ -10,7 +10,7 @@ sns.set_theme()
 
 np.random.seed(42)
 # Setup
-db_name = "dasher.db"
+db_name = "db/dasher.db"
 table_name = "reports"
 
 # Create a connection to SQLite
@@ -53,6 +53,7 @@ def map_int_to_date(start_date, days):
 
 start_date = "2024-01-01"
 days_new = np.arange(0, 2 * np.pi, np.pi / 50)
+days_int = np.linspace(0, len(days_new), len(days_new))
 
 fig, ax = plt.subplots(1, 2)
 for i, dep in enumerate(deps):
@@ -73,7 +74,7 @@ for i, dep in enumerate(deps):
     ax[0].plot(days_new, vnew, "o-", label=f"metric (dep={dep})")
     ax[1].plot(days_new, rnew, "o-", label=f"risk (dep={dep})")
 
-    for met, risk, day in zip(vnew, rnew, days_new):
+    for met, risk, day in zip(vnew, rnew, days_int):
         mapped_date = map_int_to_date(start_date, day)
 
         data = (mapped_date, dep, risk, met)
