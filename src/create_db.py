@@ -10,12 +10,18 @@ sns.set_theme()
 
 np.random.seed(42)
 # Setup
-db_name = "db/dasher.db"
+db_name = "src/db/dasher.db"
 table_name = "reports"
 
 # Create a connection to SQLite
 conn = sqlite3.connect(db_name)
 cursor = conn.cursor()
+
+# Drop table if exists
+drop_table_query = f"""
+DROP TABLE IF EXISTS {table_name}
+"""
+cursor.execute(drop_table_query)
 
 # Create table
 create_table_query = f"""
@@ -31,7 +37,7 @@ cursor.execute(create_table_query)
 
 days = [f"2024-12-{i:02d}" for i in range(31)]
 x = np.linspace(0, len(days), len(days))
-deps = ["FinTech", "Backend", "Frontend", "DevOps", "MLOps"]
+deps = ["FinTech", "Backend", "Frontend", "DevOps", "MLOps", "PropTech", "FullStack", "DataEng", "DataSci"]
 
 vals = np.linspace(np.exp(1), 10, len(days))
 mock_data = []
@@ -52,7 +58,9 @@ def map_int_to_date(start_date, days):
 
 
 start_date = "2024-01-01"
-days_new = np.arange(0, 2 * np.pi, np.pi / 50)
+n_days = 366
+dt = np.pi / int(n_days / 2)
+days_new = np.arange(0, 2 * np.pi, dt)
 days_int = np.linspace(0, len(days_new), len(days_new))
 
 fig, ax = plt.subplots(1, 2)

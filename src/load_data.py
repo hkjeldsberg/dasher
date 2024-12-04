@@ -1,12 +1,44 @@
 import sqlite3
 
 import pandas as pd
+import snowflake.connector
 from matplotlib import pyplot as plt
 
-from src.config import DATABASE_URL, TABLE_NAME
+from src.config import (
+    DATABASE_URL,
+    SNOWFLAKE_ACCOUNT,
+    SNOWFLAKE_DATABASE,
+    SNOWFLAKE_PASSWORD,
+    SNOWFLAKE_SCHEMA,
+    SNOWFLAKE_USER,
+    SNOWFLAKE_WAREHOUSE,
+    TABLE_NAME,
+)
 
 
-def fetch_data(plain_sql=False):
+def fetch_data_from_snowflake():
+    conn = snowflake.connector.connect(
+        account=SNOWFLAKE_ACCOUNT,
+        user=SNOWFLAKE_USER,
+        password=SNOWFLAKE_PASSWORD,
+        warehouse=SNOWFLAKE_WAREHOUSE,
+        database=SNOWFLAKE_DATABASE,
+        schema=SNOWFLAKE_SCHEMA,
+    )
+
+    query = f"SELECT * FROM {TABLE_NAME};"
+    cursor = conn.cursor()
+    cursor.execute(query)
+    rows = cursor.fetchall()
+
+    col_names = [desc[0] for desc in cursor.description]
+    df = pd.DataFrame(rows, columns=col_names)
+    conn.close()
+
+    return df
+
+
+def fetch_data_from_sqlite(plain_sql=False):
     conn = sqlite3.connect(DATABASE_URL)
     cursor = conn.cursor()
     query = f"SELECT * FROM {TABLE_NAME};"
@@ -27,15 +59,15 @@ def fetch_data(plain_sql=False):
 
 
 def prepare_data(df):
-    df["datetime"] = pd.to_datetime(df["report_date"], format="%Y-%m-%d")
-    df["date"] = pd.to_datetime(df["report_date"], format="%Y-%m-%d")
-    df.set_index("date", inplace=True)
+    df.columns = map(lambda x: str(x).upper(), df.columns)
+    df["DATETIME"] = pd.to_datetime(df["REPORT_DATE"], format="%Y-%m-%d")
+    df["DATE"] = pd.to_datetime(df["REPORT_DATE"], format="%Y-%m-%d")
+    df.set_index("DATE", inplace=True)
+
     return df
 
 
 def plot_data(df):
-    print(df.head())
-
-    df.groupby("department").risk_score.plot()
+    df.groupby("DEPARTMENT").risk_score.plot()
     plt.legend()
     plt.show()

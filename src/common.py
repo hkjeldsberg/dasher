@@ -1,6 +1,7 @@
 import streamlit as st
 
 from src.generate_power_point import generate_ppt
+from src.load_data import fetch_data_from_snowflake, fetch_data_from_sqlite, plot_data, prepare_data
 
 
 def generate_slides(df, feature, feature_name):
@@ -17,3 +18,21 @@ def generate_slides(df, feature, feature_name):
                 file_name=save_path,
                 mime="application/vnd.openxmlformats-officedocument.presentationml.presentation",
             )
+
+
+@st.cache_data()
+def read_data(use_snowflake=True, plot=False, store_to_csv=False):
+    if use_snowflake:
+        df = fetch_data_from_snowflake()
+    else:
+        df = fetch_data_from_sqlite()
+
+    if store_to_csv:
+        df.to_csv("src/db/reports.csv", index=False)
+
+    df = prepare_data(df)
+
+    if plot:
+        plot_data(df)
+
+    return df

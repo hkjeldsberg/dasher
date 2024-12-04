@@ -1,17 +1,6 @@
 import streamlit as st
 
-from src.load_data import fetch_data, plot_data, prepare_data
-
-
-@st.cache_data()
-def read_data(plot=False):
-    df = fetch_data()
-    df = prepare_data(df)
-
-    if plot:
-        plot_data(df)
-
-    return df
+from src.common import read_data
 
 
 def main():
