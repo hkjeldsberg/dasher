@@ -26,13 +26,22 @@ def fetch_data_from_snowflake():
         schema=SNOWFLAKE_SCHEMA,
     )
 
-    query = f"SELECT * FROM {TABLE_NAME};"
+    query = f"""
+    SELECT
+        ID::INTEGER as ID,
+        REPORT_DATE::DATE AS REPORT_DATE,
+        DEPARTMENT::VARCHAR AS DEPARTMENT,
+        RISK_SCORE::FLOAT AS RISK_SCORE,
+        FINANCIAL_METRIC::FLOAT AS FINANCIAL_METRIC,
+    FROM {TABLE_NAME};
+    """
+
     cursor = conn.cursor()
     cursor.execute(query)
-    rows = cursor.fetchall()
 
-    col_names = [desc[0] for desc in cursor.description]
-    df = pd.DataFrame(rows, columns=col_names)
+    df = pd.DataFrame.from_records(
+        cursor.fetchall(), columns=[desc[0] for desc in cursor.description]
+    )
     conn.close()
 
     return df

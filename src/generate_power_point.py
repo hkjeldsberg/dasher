@@ -6,6 +6,7 @@ from pptx.util import Inches
 
 
 def generate_ppt(df, feature, output_file="generated_report.pptx"):
+    print(df.dtypes)
     ppt = Presentation()
     # Page 1
     title_slide_layout = ppt.slide_layouts[0]
@@ -39,7 +40,7 @@ def generate_ppt(df, feature, output_file="generated_report.pptx"):
     # Page 3: Chart
     if not df.empty:
         fig, ax = plt.subplots()
-        df.groupby("department")[feature].plot(ax=ax)
+        df.groupby("DEPARTMENT")[feature].plot(ax=ax)
 
         plt.title(f"{feature.capitalize()} time series")
         plt.legend(loc="upper left")
