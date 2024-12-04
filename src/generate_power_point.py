@@ -6,7 +6,6 @@ from pptx.util import Inches
 
 
 def generate_ppt(df, feature, output_file="generated_report.pptx"):
-    print(df.dtypes)
     ppt = Presentation()
     # Page 1
     title_slide_layout = ppt.slide_layouts[0]

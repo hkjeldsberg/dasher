@@ -10,12 +10,11 @@ authors = [{ name = "Henrik Aasen Kjeldsberg", email = "henrik.kjeldsberg@live.n
 readme = "README.md"
 requires-python = ">=3.8"
 dependencies = [
-    "fastapi==0.112.0",
-    "uvicorn==0.30.6",
-    "requests==2.32.3",
-    "loguru==0.7.2",
-    "sqlalchemy==2.0.36",
-    "matplotlib==3.9.2"
+    "matplotlib==3.9.2",
+    "streamlit>=1.40.2",
+    "python-pptx==1.0.0",
+    "snowflake-connector-python==3.12.4",
+    "starlette==0.41.3"
 ]
 
 [project.optional-dependencies]
