@@ -1,10 +1,13 @@
+import numpy as np
 import streamlit as st
+from IPython import embed
 
 from src.common import generate_slides, read_data
 
 
 def main():
-    feature = "OPEN"
+    open_val = "OPEN"
+    return_val = "RETURN"
     category = "TICKER"
     feature_name = "Stock price"
 
@@ -28,24 +31,18 @@ def main():
     selected_departments = st.sidebar.multiselect("Select stocks to analyze", departments, departments)
     df = df[df[category].isin(selected_departments)]
     df = df[(df["DATETIME"] > values[0]) & (df["DATETIME"] < values[1])]
+    df['Volatility'] = df[return_val].rolling(window=30).std() * np.sqrt(30)
 
     # Metrics for column 1
     if not df.empty:
         df.set_index("DATETIME", inplace=True)
-        avg_metric = df[feature].mean()
-        max_feature = df.loc[df[feature].idxmax()]
-        max_department = max_feature[category]
-        max_value = max_feature[feature]
 
         # Data for Column 2
-        line_chart_data = df.pivot_table(index="DATETIME", columns=category, values=feature).fillna(0)
+        open_values = df.pivot_table(index="DATETIME", columns=category, values=open_val).fillna(0)
+        return_values = df.pivot_table(index="DATETIME", columns=category, values=return_val).fillna(0)
 
         # Data for Column 3
-        avg_metric_per_department = df.groupby(category)[feature].mean().reset_index()
-
-        # Hardcoded max values
-        AVG_MAX = 39731.452249880334
-        MAX_VAL = 55143.865481222725
+        avg_metric_per_department = df.groupby(category)[open_val].mean().reset_index()
 
         # Dashboard layout
         with st.container():
@@ -53,22 +50,37 @@ def main():
 
             # Column 1
             with col1:
-                st.subheader("Overview")
-                st.metric(label="Average Metric Value", value=f"{1:.0f}", delta=f"{1:.02f} %")
-                st.metric(label=f"Max Risk Department: OK", value=f"{1:.0f}", delta=f"{1:.02f} %")
+                st.subheader("Stock price")
+                st.line_chart(open_values)
 
             # Column 2
             with col2:
-                st.subheader("Metric Analysis")
-                st.line_chart(line_chart_data)
+                st.subheader("Stock return")
+                st.line_chart(return_values)
 
             # Column 3
             with col3:
-                st.subheader("Average Metric per Department")
-                st.bar_chart(avg_metric_per_department, x=category, y=feature, color=category, stack=False,
+                st.subheader("Average return per stock")
+                st.bar_chart(avg_metric_per_department, x=category, y=open_val, color=category, stack=False,
                              width=150)
 
-    generate_slides(df, feature, feature_name)
+    if not df.empty:
+        # Data for Column 2
+        volatiltiy = df[return_val].std() * np.sqrt(30)
+
+        vol_values = df.pivot_table(index="DATETIME", columns=category, values="Volatility").fillna(0)
+
+        # Column 1
+        with col1:
+            st.subheader("Volatility")
+            st.metric("Metric", f"{volatiltiy:.2f}")
+
+        # Column 2
+        with col2:
+            st.subheader("Volatility time series")
+            st.line_chart(vol_values)
+
+    generate_slides(df, open_val, feature_name)
 
 
 main()
