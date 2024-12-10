@@ -4,16 +4,9 @@ import pandas as pd
 import snowflake.connector
 from matplotlib import pyplot as plt
 
-from src.config import (
-    DATABASE_URL,
-    SNOWFLAKE_ACCOUNT,
-    SNOWFLAKE_DATABASE,
-    SNOWFLAKE_PASSWORD,
-    SNOWFLAKE_SCHEMA,
-    SNOWFLAKE_USER,
-    SNOWFLAKE_WAREHOUSE,
-    TABLE_NAME,
-)
+from src.config import (DATABASE_URL, SNOWFLAKE_ACCOUNT, SNOWFLAKE_DATABASE,
+                        SNOWFLAKE_PASSWORD, SNOWFLAKE_SCHEMA, SNOWFLAKE_USER,
+                        SNOWFLAKE_WAREHOUSE, TABLE_NAME)
 
 
 def fetch_data_from_snowflake():
@@ -69,14 +62,13 @@ def fetch_data_from_sqlite(plain_sql=False):
 
 def prepare_data(df):
     df.columns = map(lambda x: str(x).upper(), df.columns)
-    df["DATETIME"] = pd.to_datetime(df["REPORT_DATE"], format="%Y-%m-%d")
-    df["DATE"] = pd.to_datetime(df["REPORT_DATE"], format="%Y-%m-%d")
+    df["DATETIME"] = pd.to_datetime(df["DATE"], format='ISO8601', utc=True)
+    df["DATE"] = pd.to_datetime(df["DATE"], format='ISO8601', utc=True)
     df.set_index("DATE", inplace=True)
-
     return df
 
 
 def plot_data(df):
-    df.groupby("DEPARTMENT").risk_score.plot()
+    df.groupby("TICKER").risk_score.plot()
     plt.legend()
     plt.show()

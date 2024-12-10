@@ -10,5 +10,5 @@ SNOWFLAKE_DATABASE = "DASHER"
 SNOWFLAKE_SCHEMA = "FILES"
 SNOWFLAKE_TABLE_NAME = ""
 
-DATABASE_URL = "/Users/hkjeldsberg/Projects/dasher/src/db/dasher.db"
-TABLE_NAME = "reports"
+DATABASE_URL = "/Users/hkjeldsberg/Projects/dasher/src/db/dasher_stock.db"
+TABLE_NAME = "STOCKS"

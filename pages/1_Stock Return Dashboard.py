@@ -1,11 +1,12 @@
 import streamlit as st
 
-from src.common import read_data, generate_slides
+from src.common import generate_slides, read_data
 
 
 def main():
-    feature = "FINANCIAL_METRIC"
-    feature_name = "Financial Metric"
+    feature = "OPEN"
+    category = "TICKER"
+    feature_name = "Stock price"
 
     st.set_page_config(page_title="Metrics", page_icon="📊", layout="wide")
 
@@ -23,30 +24,28 @@ def main():
         max_value=max_date,
     )
 
-    departments = df["DEPARTMENT"].unique()
-    selected_departments = st.sidebar.multiselect("Select departments to analyze", departments, departments)
-    df = df[df["DEPARTMENT"].isin(selected_departments)]
+    departments = df[category].unique()
+    selected_departments = st.sidebar.multiselect("Select stocks to analyze", departments, departments)
+    df = df[df[category].isin(selected_departments)]
     df = df[(df["DATETIME"] > values[0]) & (df["DATETIME"] < values[1])]
 
     # Metrics for column 1
     if not df.empty:
-        df.set_index("ID", inplace=True)
+        df.set_index("DATETIME", inplace=True)
         avg_metric = df[feature].mean()
         max_feature = df.loc[df[feature].idxmax()]
-        max_department = max_feature["DEPARTMENT"]
+        max_department = max_feature[category]
         max_value = max_feature[feature]
 
         # Data for Column 2
-        line_chart_data = df.pivot_table(index="DATETIME", columns="DEPARTMENT", values=feature).fillna(0)
+        line_chart_data = df.pivot_table(index="DATETIME", columns=category, values=feature).fillna(0)
 
         # Data for Column 3
-        avg_metric_per_department = df.groupby("DEPARTMENT")[feature].mean().reset_index()
+        avg_metric_per_department = df.groupby(category)[feature].mean().reset_index()
 
         # Hardcoded max values
         AVG_MAX = 39731.452249880334
         MAX_VAL = 55143.865481222725
-        delta_avg = (float(avg_metric) / AVG_MAX) - 1
-        delta_max = (float(max_value) / MAX_VAL) - 1
 
         # Dashboard layout
         with st.container():
@@ -55,9 +54,8 @@ def main():
             # Column 1
             with col1:
                 st.subheader("Overview")
-                st.metric(label="Average Metric Value", value=f"{avg_metric:.0f}", delta=f"{delta_avg:.02f} %")
-                st.metric(label=f"Max Risk Department: {max_department}", value=f"{max_value:.0f}",
-                          delta=f"{delta_max:.02f} %")
+                st.metric(label="Average Metric Value", value=f"{1:.0f}", delta=f"{1:.02f} %")
+                st.metric(label=f"Max Risk Department: OK", value=f"{1:.0f}", delta=f"{1:.02f} %")
 
             # Column 2
             with col2:
@@ -67,10 +65,9 @@ def main():
             # Column 3
             with col3:
                 st.subheader("Average Metric per Department")
-                st.bar_chart(avg_metric_per_department, x="DEPARTMENT", y=feature, color="DEPARTMENT", stack=False,
+                st.bar_chart(avg_metric_per_department, x=category, y=feature, color=category, stack=False,
                              width=150)
 
-    df.set_index("DATETIME", inplace=True)
     generate_slides(df, feature, feature_name)
 
 
