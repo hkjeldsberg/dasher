@@ -1,6 +1,5 @@
 import numpy as np
 import streamlit as st
-from IPython import embed
 
 from src.common import generate_slides, read_data
 
@@ -12,8 +11,6 @@ def main():
     feature_name = "Stock price"
 
     st.set_page_config(page_title="Metrics", page_icon="📊", layout="wide")
-
-    st.title("Financial Metrics Dashboard 📈")
 
     df = read_data()
 
@@ -27,19 +24,38 @@ def main():
         max_value=max_date,
     )
 
+    currencies = {
+        "USD": 1.0,  # Assume USD is default
+        "EUR": 0.95,
+        "NOK": 11.15
+    }
+    currency = st.sidebar.selectbox("Currency", currencies.keys())
+
     departments = df[category].unique()
     selected_departments = st.sidebar.multiselect("Select stocks to analyze", departments, departments)
     df = df[df[category].isin(selected_departments)]
     df = df[(df["DATETIME"] > values[0]) & (df["DATETIME"] < values[1])]
-    df['Volatility'] = df[return_val].rolling(window=30).std() * np.sqrt(30)
+    value = currency.upper()
 
     # Metrics for column 1
+    df[open_val] = df[open_val].apply(lambda x: x * currencies[currency])
+    df[return_val] = df[return_val].apply(lambda x: x * currencies[currency])
+    return_instant = "RETURN_INSTANT"
+    df[return_instant] = (
+        df.groupby(category)[open_val]
+        .transform(lambda x: ((x - x.iloc[0]) / x.iloc[0]) * 100)
+    )
+
+
+    st.title("Stock Return Dashboard 💰")
+    generate_slides(df)
+
     if not df.empty:
         df.set_index("DATETIME", inplace=True)
 
         # Data for Column 2
         open_values = df.pivot_table(index="DATETIME", columns=category, values=open_val).fillna(0)
-        return_values = df.pivot_table(index="DATETIME", columns=category, values=return_val).fillna(0)
+        return_values = df.pivot_table(index="DATETIME", columns=category, values=return_instant).fillna(0)
 
         # Data for Column 3
         avg_metric_per_department = df.groupby(category)[open_val].mean().reset_index()
@@ -51,7 +67,7 @@ def main():
             # Column 1
             with col1:
                 st.subheader("Stock price")
-                st.line_chart(open_values)
+                st.line_chart(open_values, y_label=value)
 
             # Column 2
             with col2:
@@ -64,23 +80,6 @@ def main():
                 st.bar_chart(avg_metric_per_department, x=category, y=open_val, color=category, stack=False,
                              width=150)
 
-    if not df.empty:
-        # Data for Column 2
-        volatiltiy = df[return_val].std() * np.sqrt(30)
-
-        vol_values = df.pivot_table(index="DATETIME", columns=category, values="Volatility").fillna(0)
-
-        # Column 1
-        with col1:
-            st.subheader("Volatility")
-            st.metric("Metric", f"{volatiltiy:.2f}")
-
-        # Column 2
-        with col2:
-            st.subheader("Volatility time series")
-            st.line_chart(vol_values)
-
-    generate_slides(df, open_val, feature_name)
 
 
 main()

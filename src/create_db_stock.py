@@ -32,7 +32,8 @@ CREATE TABLE IF NOT EXISTS {table_name} (
     Close NUMERIC NOT NULL,
     High NUMERIC NOT NULL,
     Low NUMERIC NOT NULL,
-    Return Numeric NOT NULL,
+    Return NUMERIC NOT NULL,
+    Volume INTEGER NOT NULL,
     Ticker TEXT NOT NULL
 );
 """
@@ -53,17 +54,30 @@ tickers = [  # Oljefondet top 10
     "ASML",  # ASML Holding NV
     "LLY"  # Eli Lilly & Co
 ]
+volumes = [
+    453797,  # Microsoft Corp
+    390805,  # Apple Inc
+    377050,  # NVIDIA Corp
+    258292,  # Alphabet Inc
+    241291,  # Amazon.com Inc
+    161219,  # Meta Platforms Inc
+    148275,  # Taiwan Semiconductor Manufacturing Co Ltd
+    120178,  # Novo Nordisk A/S
+    111739,  # ASML Holding NV
+    104040   # Eli Lilly & Co
+]
 
 start_date = "2020-01-01"
 end_date = "2024-12-01"
 
 dataframes = []
-for ticker in tickers:
+for i,ticker in enumerate(tickers):
     timeseries = yf.Ticker(ticker)
     history = timeseries.history(start=start_date, end=end_date, interval="1d")
     history = history[['Open', 'Close', 'High', 'Low', 'Volume']]
     history['Return'] = history['Close'].pct_change(1) * 100  # Return in percentage
     history['Ticker'] = ticker
+    history['Volume'] = volumes[i]
     history.dropna(inplace=True)
     dataframes.append(history)
 
