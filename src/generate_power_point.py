@@ -7,6 +7,7 @@ from pptx import Presentation
 from pptx.chart.data import CategoryChartData
 from pptx.dml.color import RGBColor
 from pptx.enum.chart import XL_CHART_TYPE, XL_LEGEND_POSITION
+from pptx.enum.text import PP_ALIGN
 from pptx.util import Inches
 from pptx.util import Pt
 
@@ -35,6 +36,54 @@ def create_table_df(df):
     return table_df
 
 
+def create_line_chart_slide_single(ppt, df):
+    df_selected = df[df["TICKER"] == "MSFT"]
+
+    # Metrics
+    values = df_selected["CLOSE"]
+    start_price = values.iloc[0]
+    end_price = values.iloc[-1]
+    return_metric = (end_price - start_price) / start_price * 100
+
+    stock_value = (df_selected["VOLUME"].unique() * end_price).sum()
+    df_n = df.groupby("TICKER")[['CLOSE', 'VOLUME']].nth[-1]
+    total_stock_value = (df_n['CLOSE'] * df_n['VOLUME']).sum()
+    portfolio_weight = stock_value / total_stock_value
+    portfolio_contrib = (portfolio_weight * return_metric)
+
+    slide = ppt.slides.add_slide(ppt.slide_layouts[5])  # Blank slide
+    title = slide.shapes.title
+    title.text = f"Stock Performance Summary: MSTB"
+    title.text_frame.paragraphs[0].alignment = PP_ALIGN.CENTER
+
+    metrics = [
+        f"Start price: {start_price:.2f}",
+        f"End price: {end_price:.2f}",
+        f"Return (%): {return_metric:.2f}",
+        f"Contribution to portfolio (%): {portfolio_contrib:.2f}",
+    ]
+
+    for idx, metric in enumerate(metrics):
+        text_box = slide.shapes.add_textbox(Inches(0.5), Inches(1.5 + idx * 0.5), Inches(4), Inches(0.5))
+        tf = text_box.text_frame
+        tf.text = metric
+        tf.paragraphs[0].font.size = Pt(14)
+        tf.paragraphs[0].font.color.rgb = RGBColor(0, 0, 0)
+
+    chart_data = CategoryChartData()
+    chart_data.categories = df_selected['DATETIME'].dt.tz_localize(None).unique()
+    line = chart_data.add_series("MSFT", df_selected['OPEN'].to_list())
+
+    # Add chart
+    x, y, cx, cy = Inches(4.5), Inches(1.5), Inches(8), Inches(5.5)
+    chart = slide.shapes.add_chart(
+        XL_CHART_TYPE.LINE, x, y, cx, cy, chart_data
+    ).chart
+
+
+
+
+
 def generate_ppt(df, output_file="stock_report.pptx"):
     table_df = create_table_df(df)
 
@@ -54,6 +103,9 @@ def generate_ppt(df, output_file="stock_report.pptx"):
 
     # Line chart slide
     create_line_chart_slide(ppt, df)
+
+    # Line chart (2)
+    create_line_chart_slide_single(ppt, df)
 
     # End slide
     end_slide = ppt.slides.add_slide(ppt.slide_layouts[0])
@@ -186,14 +238,6 @@ def main():
     slide.shapes.title.text = "Test zero"
     slide.shapes.textbox.text = "Test zero"
     slide.placeholders[0].text = "Generated XXX"
-    # print(slide)
-    # slide.placeholders[0].text ="Test 2"
-    # slide.placeholders[1].text ="Test 2"
-    #
-    # title_slide_layout = ppt.slide_layouts[0]
-    # slide = ppt.slides.add_slide(title_slide_layout)
-    # slide.shapes.title.text = "Dynamic Report"
-    # #slide.placeholders[1].text = "Generated using  Streamlit + Python + python-pptx"
 
     # Page 2 - Raw data
     table_slide_layout = ppt.slide_layouts[5]

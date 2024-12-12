@@ -6,6 +6,7 @@ from src.load_data import (fetch_data_from_snowflake, fetch_data_from_sqlite,
 
 
 def generate_slides(df):
+
     if st.sidebar.button("Generate PowerPoint slide"):
         if df.empty:
             st.error("No data available")
