@@ -37,7 +37,8 @@ def create_table_df(df):
 
 
 def create_line_chart_slide_single(ppt, df):
-    df_selected = df[df["TICKER"] == "MSFT"]
+    tickers = df['TICKER'].unique()
+    df_selected = df[df['TICKER'] == tickers[0]]
 
     # Metrics
     values = df_selected["CLOSE"]
@@ -79,9 +80,6 @@ def create_line_chart_slide_single(ppt, df):
     chart = slide.shapes.add_chart(
         XL_CHART_TYPE.LINE, x, y, cx, cy, chart_data
     ).chart
-
-
-
 
 
 def generate_ppt(df, output_file="stock_report.pptx"):

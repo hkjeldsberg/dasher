@@ -8,12 +8,11 @@ def main():
     open_val = "OPEN"
     return_val = "RETURN"
     category = "TICKER"
-    feature_name = "Stock price"
 
     st.set_page_config(page_title="Metrics", page_icon="📊", layout="wide")
 
+    # Read data
     df = read_data()
-
     min_date = df["DATETIME"].min()
     max_date = df["DATETIME"].max()
     values = st.sidebar.slider(
@@ -31,6 +30,7 @@ def main():
     }
     currency = st.sidebar.selectbox("Currency", currencies.keys())
 
+    # Set currency
     departments = df[category].unique()
     selected_departments = st.sidebar.multiselect("Select stocks to analyze", departments, departments)
     df = df[df[category].isin(selected_departments)]
@@ -46,9 +46,9 @@ def main():
         .transform(lambda x: ((x - x.iloc[0]) / x.iloc[0]) * 100)
     )
 
-
     st.title("Stock Return Dashboard 💰")
     generate_slides(df)
+
 
     if not df.empty:
         df.set_index("DATETIME", inplace=True)

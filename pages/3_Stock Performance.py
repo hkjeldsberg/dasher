@@ -33,8 +33,8 @@ def main():
     # Set currency
     currencies = {
         "USD": 1.0,  # Assume USD is default
-        "EUR": 0.95,
-        "NOK": 11.15
+        "EUR": 0.97,
+        "NOK": 11.37
     }
     currency = st.sidebar.selectbox("Currency", currencies.keys())
     df = set_currency(df, currencies[currency])
